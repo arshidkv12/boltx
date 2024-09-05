@@ -1,0 +1,7 @@
+ARG_ENABLE('boltx', 'boltx support', 'no');
+
+if (PHP_BOLTX != 'no') {
+	AC_DEFINE('HAVE_BOLTX', 1, "Define to 1 if the PHP extension 'boltx' is available.");
+
+	EXTENSION('boltx', 'boltx.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+}
