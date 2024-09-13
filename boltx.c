@@ -64,7 +64,9 @@ PHP_FUNCTION(_boltx_unique_id)
 	}else if( Z_TYPE_P(first_el) == IS_STRING ){
 		RETVAL_STR( strpprintf(0, "%s::%s", Z_STR_P(first_el)->val, Z_STR_P(second_el)->val ) );
 	}
-	zval_ptr_dtor( &arr );
+	zend_hash_destroy( arr_hash );
+    FREE_HASHTABLE(arr_hash);
+
 	return;
 }
 /* }}}*/

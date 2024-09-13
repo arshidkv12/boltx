@@ -42,3 +42,4 @@ tests/**/*.mem
 test/*
 tmp-php.ini
 *~
+env.sh
