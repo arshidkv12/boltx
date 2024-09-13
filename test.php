@@ -3,12 +3,15 @@
 $a = new stdClass;
 $a->foo = "abc";
 
+// gc_disable();
+
 // _boltx_unique_id( $a );
 // _wp_filter_build_unique_id( $a );
  
 // $id = _boltx_unique_id( 'String Test' );
 // $id = _wp_filter_build_unique_id( 'String Test' );
- 
+$f = new Hook("Sdsdf","sdf", 1);
+var_dump( $f);
 
 class MyPlugin {
     public function __construct() {
@@ -31,9 +34,11 @@ class MyPlugin {
 		// for ($i=0; $i < 100000; $i++) { 
 			_boltx_unique_id([$this, 'display_custom_message']); 
 			_wp_filter_build_unique_id([$this, 'display_custom_message']);
+			echo _boltx_unique_id(0); 
+			// _wp_filter_build_unique_id(null);
 $b = 1;
-			echo _boltx_unique_id(function()use($b){});
-			echo _wp_filter_build_unique_id(function()use($b){});
+			// echo _boltx_unique_id(function()use($b){});
+			// echo _wp_filter_build_unique_id(function()use($b){});
 		// }
 		
     }

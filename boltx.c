@@ -8,6 +8,7 @@
 #include "ext/standard/info.h"
 #include "php_boltx.h"
 #include "boltx_arginfo.h"
+#include "hook.h"
 
 
 /* For compatibility with older PHP versions */
@@ -30,47 +31,11 @@ PHP_FUNCTION(test1)
 PHP_FUNCTION(_boltx_unique_id)
 {
 	zval *callable;
-	zval arr;  
-	HashTable *arr_hash;
-	HashPosition pos; 
-
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(callable)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if( Z_TYPE_P(callable) == IS_STRING ){
-		RETURN_STR( Z_STR_P(callable) );
-	}
-
-	if( Z_TYPE_P(callable) == IS_OBJECT ){  
-		array_init(&arr);  
-		GC_ADDREF(Z_OBJ_P(callable));
-		add_next_index_object(&arr,  Z_OBJ_P(callable) );
-		add_next_index_string(&arr, "");
-		arr_hash = Z_ARRVAL_P(&arr);
-	}else{
-		convert_to_array( callable );
-		arr_hash = Z_ARRVAL_P(callable);
-	}
-
-	zend_hash_internal_pointer_reset_ex(arr_hash, &pos);
-	zval *first_el  = zend_hash_get_current_data_ex(arr_hash, &pos);
-	zend_hash_move_forward_ex(arr_hash, &pos);
-	zval *second_el = zend_hash_get_current_data_ex(arr_hash, &pos); 
-		
-	if( Z_TYPE_P(first_el) == IS_OBJECT ){
-		RETVAL_STR( strpprintf(0, "%016zx0000000000000000%s", (intptr_t)Z_OBJ_P(first_el)->handle, Z_STR_P(second_el)->val) );
-	}else if( Z_TYPE_P(first_el) == IS_STRING ){
-		RETVAL_STR( strpprintf(0, "%s::%s", Z_STR_P(first_el)->val, Z_STR_P(second_el)->val ) );
-	}
-	
-	if( Z_TYPE_P(callable) == IS_OBJECT ){ 
-		zend_hash_destroy(arr_hash);
-		FREE_HASHTABLE(arr_hash);
-	}
-
-
-	return;
+	RETURN_STR( _boltx_unique_id( callable ) );
 }
 /* }}}*/
 
@@ -94,12 +59,25 @@ PHP_MINFO_FUNCTION(boltx)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION */
+PHP_MINIT_FUNCTION(boltx) {
+    zend_class_entry ce;
+    INIT_CLASS_ENTRY(ce, "Hook", hook_methods);
+    hook_ce = zend_register_internal_class(&ce);
+
+    zend_declare_property_null(hook_ce, "actions", sizeof("actions") - 1, ZEND_ACC_PROTECTED);
+    zend_declare_property_null(hook_ce, "filters", sizeof("filters") - 1, ZEND_ACC_PUBLIC);
+
+    return SUCCESS;
+}
+/* }}} */
+
 /* {{{ boltx_module_entry */
 zend_module_entry boltx_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"boltx",					/* Extension name */
 	ext_functions,					/* zend_function_entry */
-	NULL,							/* PHP_MINIT - Module initialization */
+	PHP_MINIT(boltx),							/* PHP_MINIT - Module initialization */
 	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(boltx),			/* PHP_RINIT - Request initialization */
 	NULL,							/* PHP_RSHUTDOWN - Request shutdown */

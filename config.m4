@@ -103,7 +103,7 @@ AS_VAR_IF([PHP_BOLTX], [no],, [
 
   dnl Configure extension sources and compilation flags.
   PHP_NEW_EXTENSION([boltx],
-    [boltx.c],
+    [boltx.c hook.c],
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 ])

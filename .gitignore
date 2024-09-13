@@ -43,3 +43,4 @@ test/*
 tmp-php.ini
 *~
 env.sh
+actmp.*

@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "complex": "c"
-    }
+        "complex": "c",
+        "boltx_arginfo.h": "c",
+        "hook.h": "c",
+        "chrono": "c",
+        "optional": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
