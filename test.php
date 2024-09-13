@@ -3,18 +3,43 @@
 $a = new stdClass;
 $a->foo = "abc";
 
-
-// for ($i=0; $i < 100000; $i++) { 
-//       _boltx_unique_id( $a );
-//       _wp_filter_build_unique_id( 1, $a, 4);
-// }
+// _boltx_unique_id( $a );
+// _wp_filter_build_unique_id( $a );
+ 
+// $id = _boltx_unique_id( 'String Test' );
+// $id = _wp_filter_build_unique_id( 'String Test' );
+ 
 
 class MyPlugin {
     public function __construct() {
-        echo strlen( _wp_filter_build_unique_id([$this, 'display_custom_message']) ) >= 32 ? 'Valid in class': 'Not valid';
+		// $a = memory_get_usage();
+		// _wp_filter_build_unique_id([$this, 'display_custom_message']);
+		// $b =  memory_get_usage();
+		// _boltx_unique_id([$this, 'display_custom_message']);
+		// $c = memory_get_usage();
+		// echo $b - $a;
+		// echo PHP_EOL;
+		// echo $c - $b;
+        // echo  _boltx_unique_id([$this, 'display_custom_message']);
+        // echo  _boltx_unique_id([$this, 'display_custom_message']);
+        // echo  _boltx_unique_id([$this, 'display_custom_message']);
+        // echo  _wp_filter_build_unique_id([$this, 'display_custom_message']);
+        // echo  _wp_filter_build_unique_id([$this, 'display_custom_message']);
+        // echo  _wp_filter_build_unique_id([$this, 'display_custom_message']);
+		//  echo  _boltx_unique_id([$this, 'display_custom_message']);
+
+		// for ($i=0; $i < 100000; $i++) { 
+			_boltx_unique_id([$this, 'display_custom_message']); 
+			_wp_filter_build_unique_id([$this, 'display_custom_message']);
+$b = 1;
+			echo _boltx_unique_id(function()use($b){});
+			echo _wp_filter_build_unique_id(function()use($b){});
+		// }
+		
     }
 }
 new  MyPlugin;
+
 
 
 function _wp_filter_build_unique_id(  $callback  ) {

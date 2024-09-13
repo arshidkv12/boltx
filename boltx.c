@@ -33,7 +33,6 @@ PHP_FUNCTION(_boltx_unique_id)
 	zval arr;  
 	HashTable *arr_hash;
 	HashPosition pos; 
-	// zend_string *retval;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(callable)
@@ -43,7 +42,7 @@ PHP_FUNCTION(_boltx_unique_id)
 		RETURN_STR( Z_STR_P(callable) );
 	}
 
-	if( Z_TYPE_P(callable) == IS_OBJECT ){
+	if( Z_TYPE_P(callable) == IS_OBJECT ){  
 		array_init(&arr);  
 		GC_ADDREF(Z_OBJ_P(callable));
 		add_next_index_object(&arr,  Z_OBJ_P(callable) );
@@ -64,8 +63,12 @@ PHP_FUNCTION(_boltx_unique_id)
 	}else if( Z_TYPE_P(first_el) == IS_STRING ){
 		RETVAL_STR( strpprintf(0, "%s::%s", Z_STR_P(first_el)->val, Z_STR_P(second_el)->val ) );
 	}
-	zend_hash_destroy( arr_hash );
-    FREE_HASHTABLE(arr_hash);
+	
+	if( Z_TYPE_P(callable) == IS_OBJECT ){ 
+		zend_hash_destroy(arr_hash);
+		FREE_HASHTABLE(arr_hash);
+	}
+
 
 	return;
 }
