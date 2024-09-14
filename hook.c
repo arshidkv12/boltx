@@ -81,11 +81,13 @@ PHP_METHOD(Hook, add_filter) {
     }
 
     // $this->priorities = array_keys( $this->callbacks );
-    zval *priorities = boltx_array_keys( &_callbacks, NULL, 0 );
+    zval priorities;
+    boltx_array_keys( &priorities, &_callbacks, NULL, 0 );
 
     zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &_callbacks);
     zval_ptr_dtor(&_callbacks);
     zend_string_release(arr_key);
+    zval_ptr_dtor(&priorities);
 }
 
 // Define the setMake method
