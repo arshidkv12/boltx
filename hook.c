@@ -1,6 +1,8 @@
 #include "php.h"
 #include "hook.h"
 #include "boltx_arginfo.h"
+#include "array.h"
+#include "ext/standard/php_array.h"
 
 
 // Define the __construct method
@@ -73,6 +75,13 @@ PHP_METHOD(Hook, add_filter) {
 
     add_assoc_zval(&arr_2, idx->val, &arr_1);
     add_index_zval(&_callbacks, priority, &arr_2);
+
+    if ( ! priority_existed && boltx_count( &_callbacks, PHP_COUNT_NORMAL ) > 1 ) {
+        boltx_ksort( &_callbacks, PHP_SORT_REGULAR );
+    }
+
+    // $this->priorities = array_keys( $this->callbacks );
+    zval *priorities = boltx_array_keys( &_callbacks, NULL, 0 );
 
     zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &_callbacks);
     zval_ptr_dtor(&_callbacks);
