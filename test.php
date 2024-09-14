@@ -12,9 +12,28 @@ $a->foo = "abc";
 // $id = _boltx_unique_id( 'String Test' );
 // $id = _wp_filter_build_unique_id( 'String Test' );
 $f = new Hook("Sdsdf","sdf", 7);
- var_dump( $f->add_action('init', 'abc') );
+$f->add_filter('init', 'abc', 9, 1);
+$f->add_filter('init', 'aaa',11, 1 );
+$f->add_filter('init', 'bbb',9, 1);
 
 var_dump( $f->callbacks  );
+
+echo 999999;
+
+require 'wp_hook.php';
+
+$c = new WP_Hook("Sdsdf","sdf", 7);
+$c->add_filter('init', 'abc', 9, 1);
+$c->add_filter('init', 'aaa',11, 1 );
+$c->add_filter('init', 'bbb',9, 1);
+
+var_dump( $f->callbacks  );
+
+
+if( $f->callbacks === $c->callbacks){
+	echo 8888;
+}
+
 
 // echo 111111;
 

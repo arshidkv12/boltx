@@ -22,7 +22,7 @@ static const zend_function_entry ext_functions[] = {
 
 PHP_METHOD(Hook, __construct);
 PHP_METHOD(Hook, __destruct);
-PHP_METHOD(Hook, add_action);
+PHP_METHOD(Hook, add_filter);
 PHP_METHOD(Hook, setMake);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Hook__construct, 0, 0, 3)
@@ -39,7 +39,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Hook__destruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Hook_add_action, 0, 0, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Hook_add_filter, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, hook_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, priority, IS_LONG, 0, "10")
@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry hook_methods[] = {
     PHP_ME(Hook, __construct, arginfo_Hook__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
     PHP_ME(Hook, __destruct, arginfo_Hook__destruct, ZEND_ACC_PUBLIC)
-    PHP_ME(Hook, add_action, arginfo_Hook_add_action, ZEND_ACC_PUBLIC)
+    PHP_ME(Hook, add_filter, arginfo_Hook_add_filter, ZEND_ACC_PUBLIC)
     PHP_ME(Hook, setMake, arginfo_Hook_setMake, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };

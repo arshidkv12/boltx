@@ -66,6 +66,11 @@ PHP_MINIT_FUNCTION(boltx) {
     hook_ce = zend_register_internal_class(&ce);
 
     zend_declare_property_null(hook_ce, "callbacks", sizeof("callbacks") - 1, ZEND_ACC_PUBLIC);
+    zend_declare_property_null(hook_ce, "priorities", sizeof("priorities") - 1, ZEND_ACC_PRIVATE);
+    zend_declare_property_null(hook_ce, "iterations", sizeof("iterations") - 1, ZEND_ACC_PRIVATE);
+    zend_declare_property_null(hook_ce, "current_priority", sizeof("current_priority") - 1, ZEND_ACC_PRIVATE);
+    zend_declare_property_null(hook_ce, "nesting_level", sizeof("nesting_level") - 1, ZEND_ACC_PRIVATE);
+    zend_declare_property_null(hook_ce, "doing_action", sizeof("doing_action") - 1, ZEND_ACC_PRIVATE);
 
     return SUCCESS;
 }
