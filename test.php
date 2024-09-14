@@ -3,6 +3,7 @@
 $a = new stdClass;
 $a->foo = "abc";
 
+
 // gc_disable();
 
 // _boltx_unique_id( $a );
@@ -10,8 +11,16 @@ $a->foo = "abc";
  
 // $id = _boltx_unique_id( 'String Test' );
 // $id = _wp_filter_build_unique_id( 'String Test' );
-$f = new Hook("Sdsdf","sdf", 1);
-var_dump( $f);
+$f = new Hook("Sdsdf","sdf", 7);
+var_dump($f);
+var_dump( $f->add_action('init', 'abc') );
+
+var_dump( $f->callbacks );
+
+echo 111111;
+
+ 
+
 
 class MyPlugin {
     public function __construct() {

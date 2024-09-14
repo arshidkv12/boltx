@@ -65,8 +65,7 @@ PHP_MINIT_FUNCTION(boltx) {
     INIT_CLASS_ENTRY(ce, "Hook", hook_methods);
     hook_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(hook_ce, "actions", sizeof("actions") - 1, ZEND_ACC_PROTECTED);
-    zend_declare_property_null(hook_ce, "filters", sizeof("filters") - 1, ZEND_ACC_PUBLIC);
+    zend_declare_property_null(hook_ce, "callbacks", sizeof("callbacks") - 1, ZEND_ACC_PUBLIC);
 
     return SUCCESS;
 }

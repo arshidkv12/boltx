@@ -6,31 +6,27 @@
 // Define the __construct method
 PHP_METHOD(Hook, __construct) {
     
-    zval actions,
-        filters;
-
-    array_init(&actions);  
-    array_init(&filters);
-
-    zend_update_property(hook_ce, Z_OBJ_P(getThis()), "actions", sizeof("actions")-1, &actions);
-    zend_update_property(hook_ce, Z_OBJ_P(getThis()), "filters", sizeof("filters")-1, &filters);
-
+    zval callbacks;
+    array_init(&callbacks);  
+    zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &callbacks);
+    zval_ptr_dtor(&callbacks);
 }
 
 PHP_METHOD(Hook, __destruct) {
     
-    zval *actions = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "actions", sizeof("actions") - 1, 1, NULL);
-    zval *filters = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "filters", sizeof("filters") - 1, 1, NULL);
-    zval_ptr_dtor(actions);
-    zval_ptr_dtor(filters);
+    zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
+    if (!Z_ISUNDEF_P(callbacks)) {
+		zval_ptr_dtor(callbacks);
+		ZVAL_UNDEF(callbacks);
+	}
 }
 
 // Define the displayDetails method
 PHP_METHOD(Hook, add_action) {
 
-    zval *callback;
+    zval *callback, arr_1, arr_2, _callbacks;
     zend_string *hook_name;
-    zend_long priority, accepted_args;
+    zend_long priority = 10, accepted_args =1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STR(hook_name)
@@ -41,8 +37,23 @@ PHP_METHOD(Hook, add_action) {
 	ZEND_PARSE_PARAMETERS_END();
      
     zend_string *idx = _boltx_unique_id(callback);
-	
-	RETURN_STR(idx);
+
+    zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
+
+    array_init(&arr_1);
+    array_init(&arr_2);
+    array_init(&_callbacks);
+
+    Z_ARRVAL(_callbacks) = zend_array_dup(Z_ARRVAL_P(callbacks));
+
+    add_assoc_zval(&arr_1, "function", callback);
+    add_assoc_long(&arr_1, "accepted_args", accepted_args);
+
+    add_assoc_zval(&arr_2, idx->val, &arr_1);
+    add_index_zval(&_callbacks, priority, &arr_2);
+
+    zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &_callbacks);
+    zval_ptr_dtor(&_callbacks);
 }
 
 // Define the setMake method
@@ -54,7 +65,8 @@ PHP_METHOD(Hook, setMake) {
         RETURN_NULL();
     }
 
-    zend_update_property_string(hook_ce, Z_OBJ_P(getThis()), "make", sizeof("make") - 1, make);
+    zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
+    RETURN_ZVAL(callbacks, 0,0);
 }
 
 
