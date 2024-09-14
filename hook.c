@@ -15,10 +15,10 @@ PHP_METHOD(Hook, __construct) {
 PHP_METHOD(Hook, __destruct) {
     
     zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
-    if (!Z_ISUNDEF_P(callbacks)) {
-		zval_ptr_dtor(callbacks);
-		ZVAL_UNDEF(callbacks);
-	}
+    // if (Z_REFCOUNTED_P(callbacks) && Z_REFCOUNT_P(callbacks) > 0) {
+	// 	zval_ptr_dtor(callbacks);
+	// }
+	
 }
 
 // Define the displayDetails method
@@ -42,9 +42,8 @@ PHP_METHOD(Hook, add_action) {
 
     array_init(&arr_1);
     array_init(&arr_2);
-    array_init(&_callbacks);
 
-    Z_ARRVAL(_callbacks) = zend_array_dup(Z_ARRVAL_P(callbacks));
+    ZVAL_ARR(&_callbacks, zend_array_dup(Z_ARRVAL_P(callbacks)));
 
     add_assoc_zval(&arr_1, "function", callback);
     add_assoc_long(&arr_1, "accepted_args", accepted_args);

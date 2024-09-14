@@ -12,14 +12,19 @@ $a->foo = "abc";
 // $id = _boltx_unique_id( 'String Test' );
 // $id = _wp_filter_build_unique_id( 'String Test' );
 $f = new Hook("Sdsdf","sdf", 7);
-var_dump($f);
-var_dump( $f->add_action('init', 'abc') );
+ var_dump( $f->add_action('init', 'abc') );
 
-var_dump( $f->callbacks );
+var_dump( $f->callbacks  );
 
-echo 111111;
+// echo 111111;
 
- 
+// $callbacks[ 10 ][ 'abc' ] = array(
+// 	'function'      => 'abc',
+// 	'accepted_args' => 1,
+// );
+
+
+ die;
 
 
 class MyPlugin {
