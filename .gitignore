@@ -41,6 +41,8 @@ tests/**/*.db
 tests/**/*.mem
 test/*
 tmp-php.ini
+.vscode/*
+.vscode
 *~
 env.sh
 actmp.*
