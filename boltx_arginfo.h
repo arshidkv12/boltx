@@ -25,10 +25,7 @@ PHP_METHOD(Hook, __destruct);
 PHP_METHOD(Hook, add_filter);
 PHP_METHOD(Hook, setMake);
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Hook__construct, 0, 0, 3)
-    ZEND_ARG_INFO(0, make)
-    ZEND_ARG_INFO(0, model)
-    ZEND_ARG_INFO(0, year)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_Hook__construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Hook_setMake, 0, 0, 1)

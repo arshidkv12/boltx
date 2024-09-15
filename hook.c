@@ -3,6 +3,7 @@
 #include "boltx_arginfo.h"
 #include "array.h"
 #include "ext/standard/php_array.h"
+#include "ext/standard/php_var.h"
 
 
 // Define the __construct method
@@ -80,9 +81,9 @@ PHP_METHOD(Hook, add_filter) {
         boltx_ksort( &_callbacks, PHP_SORT_REGULAR );
     }
 
-    // $this->priorities = array_keys( $this->callbacks );
     zval priorities;
     boltx_array_keys( &priorities, &_callbacks, NULL, 0 );
+    //php_var_dump(&priorities, 1);
 
     zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &_callbacks);
     zval_ptr_dtor(&_callbacks);

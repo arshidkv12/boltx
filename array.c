@@ -661,31 +661,73 @@ zend_long boltx_count(zval *array, zend_long mode){
 
 /* {{{ Return just the keys from the input array, optionally only for the specified search_value */
 void boltx_array_keys(zval *return_value, zval *input, zval *search_value, bool strict){
-
-    zval *entry, new_val;
+	zval  *entry,				/* An entry in the input array */
+	       new_val;				/* New value */
 	zend_ulong num_idx;
 	zend_string *str_idx;
+	zend_array *arrval;
+	zend_ulong elem_count;
 
-	if (EXPECTED(Z_TYPE_P(input) == IS_ARRAY)) {
-		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
-		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			/* Go through input array and add keys to the return array */
-			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
-				if (str_idx) {
-					ZVAL_STR_COPY(&new_val, str_idx);
-				} else {
-					ZVAL_LONG(&new_val, num_idx);
-				}
-				ZEND_HASH_FILL_ADD(&new_val);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
+	arrval = Z_ARRVAL_P(input);
+	elem_count = zend_hash_num_elements(arrval);
+
+	/* Base case: empty input */
+	if (!elem_count) {
+		RETVAL_COPY(input);
 	}
 
-	entry = NULL;
-	str_idx = NULL;
-	num_idx = 0;
-	ZVAL_UNDEF(&new_val);
-	 
+	/* Initialize return array */
+	if (search_value != NULL) {
+		array_init(return_value);
+
+		if (strict) {
+			ZEND_HASH_FOREACH_KEY_VAL(arrval, num_idx, str_idx, entry) {
+				ZVAL_DEREF(entry);
+				if (fast_is_identical_function(search_value, entry)) {
+					if (str_idx) {
+						ZVAL_STR_COPY(&new_val, str_idx);
+					} else {
+						ZVAL_LONG(&new_val, num_idx);
+					}
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
+				}
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			ZEND_HASH_FOREACH_KEY_VAL(arrval, num_idx, str_idx, entry) {
+				if (fast_equal_check_function(search_value, entry)) {
+					if (str_idx) {
+						ZVAL_STR_COPY(&new_val, str_idx);
+					} else {
+						ZVAL_LONG(&new_val, num_idx);
+					}
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	} else {
+		array_init_size(return_value, elem_count);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval)) {
+				/* Optimistic case: range(0..n-1) for vector-like packed array */
+				zend_ulong lval = 0;
+
+				for (; lval < elem_count; ++lval) {
+					ZEND_HASH_FILL_SET_LONG(lval);
+					ZEND_HASH_FILL_NEXT();
+				}
+			} else {
+				/* Go through input array and add keys to the return array */
+				ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+					if (str_idx) {
+						ZEND_HASH_FILL_SET_STR_COPY(str_idx);
+					} else {
+						ZEND_HASH_FILL_SET_LONG(num_idx);
+					}
+					ZEND_HASH_FILL_NEXT();
+				} ZEND_HASH_FOREACH_END();
+			}
+		} ZEND_HASH_FILL_END();
+	}
 }
 /* }}} */

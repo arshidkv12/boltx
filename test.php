@@ -1,5 +1,8 @@
 <?php 
 
+
+require 'wp_hook1.php';
+
 $a = new stdClass;
 $a->foo = "abc";
 
@@ -11,23 +14,27 @@ $a->foo = "abc";
  
 // $id = _boltx_unique_id( 'String Test' );
 // $id = _wp_filter_build_unique_id( 'String Test' );
-$f = new Hook("Sdsdf","sdf", 7);
+$f = new Hook();
 $f->add_filter('init', 'abc', 9, 1);
 $f->add_filter('init', 'aaa',11, 1 );
 $f->add_filter('init', 'bbb',9, 1);
+$f->add_filter('init', 'bbb',7, 1);
 
 var_dump( $f->callbacks  );
+echo json_encode( $f->callbacks  );
 
-echo 999999;
+echo 999999; 
 
-require 'wp_hook.php';
+// require 'wp_hook.php';
 
-$c = new WP_Hook("Sdsdf","sdf", 7);
+$c = new WP_Hook1();
 $c->add_filter('init', 'abc', 9, 1);
 $c->add_filter('init', 'aaa',11, 1 );
 $c->add_filter('init', 'bbb',9, 1);
+$c->add_filter('init', 'bbb',7, 1);
 
-var_dump( $f->callbacks  );
+// var_dump( $c->callbacks  );
+var_dump(   array_keys( $c->callbacks ) );
 
 
 if( $f->callbacks === $c->callbacks){
