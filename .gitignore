@@ -43,7 +43,6 @@ test/*
 tmp-php.ini
 .vscode/*
 .vscode
-wp_hook.php
 *~
 env.sh
 actmp.*
