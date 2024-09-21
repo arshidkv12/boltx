@@ -6,6 +6,22 @@
 #include "ext/standard/php_var.h"
 
 
+typedef struct {
+    zval *function;
+    zend_long accepted_args;
+} callbacksData;
+
+void callbacks_data_dtor(zval *zv) {
+    callbacksData *data = (callbacksData *) Z_PTR_P(zv);
+                
+    if (data->function) {
+        // Decrement the reference count of the function if necessary
+        zval_ptr_dtor(data->function);
+        efree(data->function);
+    }
+    efree(data);
+}
+
 // Define the __construct method
 PHP_METHOD(Hook, __construct) {
     
@@ -38,6 +54,84 @@ PHP_METHOD(Hook, __destruct) {
 	
 }
 
+
+void iterate_two_dimensional_array(zval *callbacks)
+{
+    zval *first_level_value;
+    zend_string *first_level_key;
+    zend_long first_level_index;
+    
+    // Ensure the zval is an array
+    if (Z_TYPE_P(callbacks) != IS_ARRAY) {
+        php_error_docref(NULL, E_WARNING, "Expected an array");
+        return;
+    }
+
+
+    // Iterate over the first-level array
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(callbacks), first_level_index, first_level_key, first_level_value) {
+
+        if (Z_TYPE_P(first_level_value) == IS_ARRAY) {
+            // Inner loop to iterate over the second-level array
+            zval *second_level_value;
+            zend_string *second_level_key;
+            zend_long second_level_index;
+
+            ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(first_level_value), second_level_index, second_level_key, second_level_value) {
+
+            callbacksData *data;
+
+            data = (callbacksData *) Z_PTR_P(second_level_value);
+            php_printf("+++%s---", Z_STR_P(data->function)->val);
+            php_printf("soop%lld---", data->accepted_args);
+                
+                
+            } ZEND_HASH_FOREACH_END();
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+
+PHP_METHOD(Hook, call_function) {
+    zval *hook_data, *args, *val, retval;
+    callbacksData *data;
+    zend_long  priority, index_val;
+    zend_string *key_val;
+
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(priority)
+		Z_PARAM_ZVAL(args)
+	ZEND_PARSE_PARAMETERS_END();  
+
+    zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, 1, NULL);
+
+    zval *the_ = zend_hash_index_find(Z_ARRVAL_P(callbacks), priority);
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(the_), index_val, key_val, val) {
+
+    data = (callbacksData *) Z_PTR_P(val);
+        // php_printf("+++%s---", Z_STR_P(data->function)->val);
+        call_user_function(EG(function_table), NULL, (data->function), &retval, 0, args);
+    }ZEND_HASH_FOREACH_END();
+    
+//  iterate_two_dimensional_array(callbacks);
+}
+
+PHP_METHOD(Hook, getData) {
+    
+    zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, 1, NULL);
+    // if (Z_REFCOUNTED_P(callbacks) && Z_REFCOUNT_P(callbacks) > 0) {
+	// 	zval_ptr_dtor(callbacks);
+	// }
+
+    iterate_two_dimensional_array(callbacks);
+
+    // php_var_dump(callbacks, 1);
+    // FREE_HASHTABLE(Z_ARRVAL_P(callbacks));
+	
+}
+
+
+
 // Define the displayDetails method
 PHP_METHOD(Hook, add_filter) {
 
@@ -57,11 +151,16 @@ PHP_METHOD(Hook, add_filter) {
     zend_string *idx = _boltx_unique_id(callback);
 
     zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
-    
+
+    if(Z_TYPE_P(callbacks) == IS_NULL){
+        array_init(callbacks);
+    }
+
     ht_callback = Z_ARRVAL_P(callbacks);
     bool priority_existed = zend_hash_index_exists(ht_callback, priority);
     
-    array_init(&arr_1);
+    // array_init(&arr_1);
+
 
     ZVAL_ARR(&_callbacks, zend_array_dup(Z_ARRVAL_P(callbacks)));
 
@@ -71,10 +170,23 @@ PHP_METHOD(Hook, add_filter) {
         array_init(&arr_2);
     }
 
-    add_assoc_zval(&arr_1, "function", callback);
-    add_assoc_long(&arr_1, "accepted_args", accepted_args);
+    Z_TRY_ADDREF_P(callback);
+    callbacksData *data = emalloc(sizeof(callbacksData));
+    data->function = emalloc(sizeof(zval)); // Allocate memory for zval
+    ZVAL_COPY(data->function, callback);
+    // data->function = callback;   
+    data->accepted_args = accepted_args;
 
-    add_assoc_zval(&arr_2, idx->val, &arr_1);
+    // zval data_zval;
+    // ZVAL_PTR(&data_zval, data);    
+    // zend_hash_add_mem(Z_ARRVAL_P(&arr_1), idx, data, sizeof(callbacksData));
+    // add_assoc_zval(&arr_1, "function", callback);
+    // add_assoc_long(&arr_1, "accepted_args", accepted_args);
+
+    // add_assoc_zval(&arr_2, idx->val, &arr_1);
+    zend_hash_add_mem(Z_ARRVAL_P(&arr_2), idx, data, sizeof(callbacksData));
+    efree(data);
+    Z_ARRVAL_P(&arr_2)->pDestructor = callbacks_data_dtor;
     add_index_zval(&_callbacks, priority, &arr_2);
 
     if ( ! priority_existed && boltx_count( &_callbacks, PHP_COUNT_NORMAL ) > 1 ) {
@@ -87,7 +199,6 @@ PHP_METHOD(Hook, add_filter) {
 
     zend_update_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks")-1, &_callbacks);
     zval_ptr_dtor(&_callbacks);
-    zend_string_release(arr_key);
     zval_ptr_dtor(&priorities);
 }
 

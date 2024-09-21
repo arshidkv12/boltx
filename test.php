@@ -17,13 +17,20 @@ $a->foo = "abc";
 $f = new Hook();
 $f->add_filter('init', 'abc', 9, 1);
 $f->add_filter('init', 'aaa',11, 1 );
-$f->add_filter('init', 'bbb',9, 1);
+$f->add_filter('init', 'wwwww',9, 1);
 $f->add_filter('init', 'bbb',7, 1);
 
-var_dump( $f->callbacks  );
-echo json_encode( $f->callbacks  );
+$g = new WP_Hook1();
+$g->add_filter('init', 'abc', 9, 1);
+$g->add_filter('init', 'aaa',11, 1 );
+$g->add_filter('init', 'wwwww',9, 1);
+$g->add_filter('init', 'bbb',7, 1);
 
-echo 999999; 
+$f->getData();
+
+// var_dump( $f->callbacks  );
+
+echo 999999; die;
 
 // require 'wp_hook.php';
 

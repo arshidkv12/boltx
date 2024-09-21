@@ -24,7 +24,7 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 	 * @since 4.7.0
 	 * @var array
 	 */
-	public $callbacks = array();
+	// public $callbacks = array();
 
 	/**
 	 * Priorities list.
@@ -79,6 +79,22 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 	 *                                in which they were added to the filter.
 	 * @param int      $accepted_args The number of arguments the function accepts.
 	 */
+	
+	public function _add_filter( $hook_name, $callback, $priority, $accepted_args ) {
+		parent::add_filter( $hook_name, $callback, $priority, $accepted_args );
+
+		$priority_existed = isset( $this->callbacks[ $priority ] );
+		
+		if ( ! $priority_existed && count( $this->callbacks ) > 1 ) {
+			ksort( $this->callbacks, SORT_NUMERIC );
+		}
+
+		$this->priorities = array_keys( $this->callbacks );
+
+		if ( $this->nesting_level > 0 ) {
+			$this->resort_active_iterations( $priority, $priority_existed );
+		}
+	}
 	// public function add_filter( $hook_name, $callback, $priority, $accepted_args ) {
 	// 	$idx = _wp_filter_build_unique_id( $callback  );
 
@@ -296,7 +312,8 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 	 *                     This array is expected to include $value at index 0.
 	 * @return mixed The filtered value after all hooked functions are applied to it.
 	 */
-	public function apply_filters( $value, $args ) {
+	public function apply_filters( $value, $args ) { 
+
 		if ( ! $this->callbacks ) {
 			return $value;
 		}
@@ -312,20 +329,18 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 
 			$priority = $this->current_priority[ $nesting_level ];
 
-			foreach ( $this->callbacks[ $priority ] as $the_ ) {
-				if ( ! $this->doing_action ) {
-					$args[0] = $value;
-				}
-
-				// Avoid the array_slice() if possible.
-				if ( 0 === $the_['accepted_args'] ) {
-					$value = call_user_func( $the_['function'] );
-				} elseif ( $the_['accepted_args'] >= $num_args ) {
-					$value = call_user_func_array( $the_['function'], $args );
-				} else {
-					$value = call_user_func_array( $the_['function'], array_slice( $args, 0, $the_['accepted_args'] ) );
-				}
-			}
+			$this->call_function( $priority, $args); die;
+			// foreach ( $this->callbacks[ $priority ] as $the_ ) {
+			// 	// Avoid the array_slice() if possible.
+			// 	$this->call_function($the_); die;
+			// 	if ( 0 === $the_['accepted_args'] ) {
+			// 		$value = call_user_func( $the_['function'] );
+			// 	} elseif ( $the_['accepted_args'] >= $num_args ) {
+			// 		$value = call_user_func_array( $the_['function'], $args );
+			// 	} else {
+			// 		$value = call_user_func_array( $the_['function'], array_slice( $args, 0, $the_['accepted_args'] ) );
+			// 	}
+			// }
 		} while ( false !== next( $this->iterations[ $nesting_level ] ) );
 
 		unset( $this->iterations[ $nesting_level ] );
@@ -438,7 +453,7 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 
 				// Loop through callbacks.
 				foreach ( $callbacks as $cb ) {
-					$hook->add_filter( $hook_name, $cb['function'], $priority, $cb['accepted_args'] );
+					$hook->_add_filter( $hook_name, $cb['function'], $priority, $cb['accepted_args'] );
 				}
 			}
 
