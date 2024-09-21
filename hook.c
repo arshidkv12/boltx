@@ -93,7 +93,7 @@ void iterate_two_dimensional_array(zval *callbacks)
 
 
 PHP_METHOD(Hook, call_function) {
-    zval *hook_data, *args, *val, retval;
+    zval *hook_data, *val, retval, *args;
     callbacksData *data;
     zend_long  priority, index_val;
     zend_string *key_val;
@@ -108,12 +108,18 @@ PHP_METHOD(Hook, call_function) {
     zval *the_ = zend_hash_index_find(Z_ARRVAL_P(callbacks), priority);
     ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(the_), index_val, key_val, val) {
 
-    data = (callbacksData *) Z_PTR_P(val);
-        // php_printf("+++%s---", Z_STR_P(data->function)->val);
-        call_user_function(EG(function_table), NULL, (data->function), &retval, 0, args);
+        data = (callbacksData *) Z_PTR_P(val);
+        zend_long num_args = boltx_count( args, PHP_COUNT_NORMAL ); 
+        if(data->accepted_args == 0){
+            call_user_function(EG(function_table), NULL, data->function, &retval, 0, NULL);
+        }else if( data->accepted_args >= num_args ) {
+            call_user_function(EG(function_table), NULL, data->function, &retval, num_args, args);
+        } else {
+                // 		$value = call_user_func_array( $the_['function'], array_slice( $args, 0, $the_['accepted_args'] ) );
+        }
     }ZEND_HASH_FOREACH_END();
-    
-//  iterate_two_dimensional_array(callbacks);
+
+    RETURN_ZVAL(&retval, 1, 0);
 }
 
 PHP_METHOD(Hook, getData) {
@@ -137,7 +143,7 @@ PHP_METHOD(Hook, add_filter) {
 
     zval *callback, *tmp, arr_1, arr_2, _callbacks;
     zend_string *hook_name, *arr_key;
-    zend_long priority = 10, accepted_args =1;
+    zend_long priority = 10, accepted_args = 0;
     HashTable *ht_callback;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)

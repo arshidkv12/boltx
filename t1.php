@@ -18,6 +18,7 @@ add_action('init', 'check_title', 9);
 
 function check_title(){
 	echo "oooooooo";
+	return "sdfdsf";
 }
 
 // add_filter1('init', 'dfdf', 7);
