@@ -154,7 +154,7 @@ PHP_METHOD(Hook, add_filter) {
         Z_PARAM_LONG(accepted_args)
 	ZEND_PARSE_PARAMETERS_END();
      
-    zend_string *idx = _boltx_unique_id(callback);
+    zend_string *idx = _boltx_unique_id(callback); 
 
     zval *callbacks = zend_read_property(hook_ce, Z_OBJ_P(getThis()), "callbacks", sizeof("callbacks") - 1, 1, NULL);
 
@@ -192,6 +192,8 @@ PHP_METHOD(Hook, add_filter) {
     // add_assoc_zval(&arr_2, idx->val, &arr_1);
     zend_hash_add_mem(Z_ARRVAL_P(&arr_2), idx, data, sizeof(callbacksData));
     efree(data);
+    zend_string_release(idx);
+
     Z_ARRVAL_P(&arr_2)->pDestructor = callbacks_data_dtor;
     add_index_zval(&_callbacks, priority, &arr_2);
 
@@ -222,10 +224,9 @@ PHP_METHOD(Hook, setMake) {
 }
 
 
-zend_string *_boltx_unique_id(zval *callable){
+zend_string *_boltx_unique_id(zval *callable){  
 	zval arr;  
 	HashTable *arr_hash;
-	HashPosition pos; 
 
 	if( Z_TYPE_P(callable) == IS_STRING ){
 		return( Z_STR_P(callable) );
@@ -246,10 +247,8 @@ zend_string *_boltx_unique_id(zval *callable){
 		arr_hash = Z_ARRVAL_P(callable);
 	}
 
-	zend_hash_internal_pointer_reset_ex(arr_hash, &pos);
-	zval *first_el  = zend_hash_get_current_data_ex(arr_hash, &pos);
-	zend_hash_move_forward_ex(arr_hash, &pos);
-	zval *second_el = zend_hash_get_current_data_ex(arr_hash, &pos); 
+    zval *first_el = zend_hash_index_find(arr_hash, 0);
+    zval *second_el = zend_hash_index_find(arr_hash, 1);
 	
     zend_string *retval;
 	if( Z_TYPE_P(first_el) == IS_OBJECT ){
@@ -257,11 +256,14 @@ zend_string *_boltx_unique_id(zval *callable){
 	}else if( Z_TYPE_P(first_el) == IS_STRING ){
 		retval = strpprintf(0, "%s::%s", Z_STR_P(first_el)->val, Z_STR_P(second_el)->val );
 	}
-	
+
 	if( Z_TYPE_P(callable) == IS_OBJECT ){ 
 		zend_hash_destroy(arr_hash);
 		FREE_HASHTABLE(arr_hash);
-	}
+	}else{
+	    // zend_hash_destroy(arr_hash);
+		// FREE_HASHTABLE(arr_hash);
+    }
     return retval;
 }
 

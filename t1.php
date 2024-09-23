@@ -5,8 +5,17 @@ gc_disable();
 require 'wp_hook.php';
 require 'wp_hook1.php';
 
+class test{
+	function __construct(){
+		add_action('init',[$this, 'check_title'], 9); 
 
-add_action('init', 'check_title', 9); 
+	}
+	function check_title(){
+		echo "oooooooo";
+		return "sdfdsf";
+	}
+}
+new test;
 // add_filter1('init', 'check_title', 9);
 // add_action('init', 'check_title', 11);
 // add_filter1('init', 'check_title', 11);
@@ -16,10 +25,7 @@ add_action('init', 'check_title', 9);
 // add_action('init', 'check_title', 111);
 // add_filter1('init', 'check_title', 111);
 
-function check_title(){
-	echo "oooooooo";
-	return "sdfdsf";
-}
+
 
 // add_filter1('init', 'dfdf', 7);
 // add_filter1('wp_footer', 'footer_check');
