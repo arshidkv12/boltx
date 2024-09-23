@@ -165,8 +165,6 @@ PHP_METHOD(Hook, add_filter) {
     ht_callback = Z_ARRVAL_P(callbacks);
     bool priority_existed = zend_hash_index_exists(ht_callback, priority);
     
-    // array_init(&arr_1);
-
 
     ZVAL_ARR(&_callbacks, zend_array_dup(Z_ARRVAL_P(callbacks)));
 
@@ -176,7 +174,7 @@ PHP_METHOD(Hook, add_filter) {
         array_init(&arr_2);
     }
 
-    Z_TRY_ADDREF_P(callback);
+
     callbacksData *data = emalloc(sizeof(callbacksData));
     data->function = emalloc(sizeof(zval)); // Allocate memory for zval
     ZVAL_COPY(data->function, callback);

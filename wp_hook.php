@@ -88,7 +88,7 @@ final class WP_Hook extends Hook implements Iterator, ArrayAccess{
 		if ( ! $priority_existed && count( $this->callbacks ) > 1 ) {
 			ksort( $this->callbacks, SORT_NUMERIC );
 		}
-
+    
 		$this->priorities = array_keys( $this->callbacks );
 
 		if ( $this->nesting_level > 0 ) {
